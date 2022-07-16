@@ -6,7 +6,7 @@ from flask_cors import CORS
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/',  static_folder="dist")
 csrf = CSRFProtect(app)
 app.config.from_object(Config)
 app.secret_key="secreto"

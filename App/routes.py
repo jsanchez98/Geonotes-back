@@ -2,7 +2,7 @@ import flask
 from App import app, db, login#, csrf
 from App.errors import APIError
 from App.models import User, Post
-from flask import render_template, request, jsonify
+from flask import render_template, request, jsonify, send_from_directory
 import json
 from flask_login import current_user, login_required, login_user, logout_user
 from flask_wtf.csrf import generate_csrf, session, CSRFError
@@ -18,18 +18,15 @@ def user_loader(id):
 @app.route('/')
 @app.route('/index')
 def index():
-    user = {'username':'Josh'}
-    title = "Title1"
-    posts = Post.query.all()
-    return render_template('index.html', user=user, title=title, posts = posts)
+    print("here")
+    return app.send_static_file("index.html")
 
 # Extract bodies from posts and send as a stringified list
 @app.route('/posts')
 @login_required
 def sendPosts():
-    print("send " + str(current_user.is_authenticated))
-    posts = Post.query.all()
-    postBodies = list(map(lambda post: { "text" : post.body, "ID": post.id}, posts))
+    posts = Post.query.filter_by(user_id=current_user.id)
+    postBodies = list(map(lambda post: { "text" : post.body, "ID": post.id, "coordinates": post.location}, posts))
     postsString = json.dumps(postBodies)
     return postsString
 
@@ -37,7 +34,8 @@ def sendPosts():
 @login_required
 def addPost():
     if request.method == 'POST':
-        newPost = Post(body=request.json['text'], user_id=request.json['id'])
+        newPost = Post(body=request.json['text'], user_id=current_user.id,
+                        location=request.json['coordinates'])
         db.session.add(newPost)
         db.session.commit()
         justMade = {
@@ -66,7 +64,6 @@ def login():
         print("apierror")
         raise APIError("Invalid username or password")
     login_user(user)
-    print(session)
     return "success"
 
 @app.route('/logout')
