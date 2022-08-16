@@ -1,5 +1,5 @@
 import flask
-from App import app, db, login#, csrf
+from App import application, db, login#, csrf
 from App.errors import APIError
 from App.models import User, Post
 from flask import render_template, request, jsonify, send_from_directory
@@ -15,14 +15,17 @@ from flask_wtf.csrf import generate_csrf, session, CSRFError
 def user_loader(id):
     return User.query.get(int(id))
 
-@app.route('/')
-@app.route('/index')
+@application.route('/')
+@application.route('/index')
 def index():
-    print("here")
     return app.send_static_file("index.html")
 
+@application.route('/hello')
+def hello():
+    return "Hello, world!"
+
 # Extract bodies from posts and send as a stringified list
-@app.route('/posts')
+@application.route('/posts')
 @login_required
 def sendPosts():
     posts = Post.query.filter_by(user_id=current_user.id)
@@ -30,7 +33,7 @@ def sendPosts():
     postsString = json.dumps(postBodies)
     return postsString
 
-@app.route('/addpost', methods=['POST'])
+@application.route('/addpost', methods=['POST'])
 @login_required
 def addPost():
     if request.method == 'POST':
@@ -40,12 +43,12 @@ def addPost():
         db.session.commit()
         justMade = {
             "text": newPost.body,
-            "ID": newPost.id
+            "ID": newPost.id,
+            "coordinates": newPost.location
         }
-        print(json.dumps(justMade))
         return json.dumps(justMade)
 
-@app.route('/deletepost', methods=['POST'])
+@application.route('/deletepost', methods=['POST'])
 @login_required
 def deletePost():
     if request.method == 'POST':
@@ -55,7 +58,7 @@ def deletePost():
         db.session.commit()
         return "post " + str(id) + " deleted"
 
-@app.route('/login', methods=['GET','POST'])
+@application.route('/login', methods=['GET','POST'])
 def login():
     if current_user.is_authenticated:
         return "loggedin"
@@ -66,13 +69,13 @@ def login():
     login_user(user)
     return "success"
 
-@app.route('/logout')
+@application.route('/logout')
 @login_required
 def logout():
     logout_user()
     return "success"
 
-@app.route('/register', methods=['POST'])
+@application.route('/register', methods=['POST'])
 def register():
     user = User.query.filter_by(username=request.json["username"]).first()
     if user is not None:
@@ -83,30 +86,25 @@ def register():
     db.session.commit()
     return "success"
 
-@app.route('/api/csrf')
+@application.route('/api/csrf')
 def return_csrf():
     token = generate_csrf()
-    if app.config['WTF_CSRF_FIELD_NAME'] in session:
-        print("there")
+    
     response = jsonify({"detail": "CSRF token set"})
     response.headers.set("X-CSRFToken", token)
-    print(session['csrf_token'])
     return response
     
 
-@app.errorhandler(APIError)
+@application.errorhandler(APIError)
 def handle_exception(err):
     return json.dumps({"message": err.description}), 400
 
-@app.errorhandler(401)
+@application.errorhandler(401)
 def handle(err):
-    print(session)
     return err
 
-@app.errorhandler(CSRFError)
+@application.errorhandler(CSRFError)
 def handle_csrf_error(err):
-    print(session)
     if app.config['WTF_CSRF_FIELD_NAME'] not in session:
         print("not in session")
-    print(json.dumps({"message": err.description}))
     return json.dumps({"message": err.description}), 400

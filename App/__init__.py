@@ -6,25 +6,28 @@ from flask_cors import CORS
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
 
-app = Flask(__name__, static_url_path='/',  static_folder="dist")
-csrf = CSRFProtect(app)
-app.config.from_object(Config)
-app.secret_key="secreto"
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
- 
-login = LoginManager(app)
+application = Flask(__name__, static_url_path='/',  static_folder="dist")
+csrf = CSRFProtect(application)
+application.config.from_object(Config)
+application.secret_key="secreto"
+db = SQLAlchemy(application)
+migrate = Migrate(application, db)
+print("running")
+login = LoginManager(application)
 #login.login_view = "login"
-login.init_app(app)
+login.init_app(application)
 login.session_protection = "strong"
 
-csrf.init_app(app)
+csrf.init_app(application)
 CORS(
-    app,
+    application,
     supports_credentials=True,
     resources={r'/*': {'origins': 'http://localhost:8080'}},
     # Indicates that Content-Type and X-CSRFToken headers will be exposed
     expose_headers=["Content-Type", "X-CSRFToken"],
     )  # Allow cookies to be sent cross-domain
 
-from App import routes, models, errors
+from .errors import APIError
+from .models import User, Post
+from .routes import *
+ 
