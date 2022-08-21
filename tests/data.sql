@@ -1,3 +1,10 @@
+CREATE TABLE user (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL
+);
+
 INSERT INTO user (username, password)
 VALUES
-  ('test', 'pbkdf2:sha256:50000$TCI4GzcX$0de171a4f4dac32e3364c7ddc7c14f3e2fa61f2d17574483f7ffbb431b4acb2f')
+  ('test', 'pbkdf2:sha256:260000$aohyx9TYWwET7dvb$b4e41a446d9cfd3a249c978c8b28c3f1b3ffa979da3bad2a98750f0cbcaf7b56')
+

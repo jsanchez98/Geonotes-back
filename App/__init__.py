@@ -7,6 +7,7 @@ from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
 
 application = Flask(__name__, static_url_path='/',  static_folder="dist")
+
 csrf = CSRFProtect(application)
 application.config.from_object(Config)
 application.secret_key="secreto"
@@ -22,7 +23,7 @@ csrf.init_app(application)
 CORS(
     application,
     supports_credentials=True,
-    resources={r'/*': {'origins': 'http://localhost:8080'}},
+    resources={r'/*': {'origins': ['http://127.0.0.1:5173','http://localhost:8080']}},
     # Indicates that Content-Type and X-CSRFToken headers will be exposed
     expose_headers=["Content-Type", "X-CSRFToken"],
     )  # Allow cookies to be sent cross-domain

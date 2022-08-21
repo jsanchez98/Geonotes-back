@@ -18,7 +18,7 @@ def user_loader(id):
 @application.route('/')
 @application.route('/index')
 def index():
-    return app.send_static_file("index.html")
+    return application.send_static_file("index.html")
 
 @application.route('/hello')
 def hello():
@@ -105,6 +105,6 @@ def handle(err):
 
 @application.errorhandler(CSRFError)
 def handle_csrf_error(err):
-    if app.config['WTF_CSRF_FIELD_NAME'] not in session:
+    if application.config['WTF_CSRF_FIELD_NAME'] not in session:
         print("not in session")
     return json.dumps({"message": err.description}), 400
