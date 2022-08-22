@@ -56,7 +56,7 @@ def deletePost():
         post = Post.query.get(id)
         db.session.delete(post)
         db.session.commit()
-        return "post " + str(id) + " deleted"
+        return sendPosts()
 
 @application.route('/login', methods=['GET','POST'])
 def login():
